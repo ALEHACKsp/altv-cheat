@@ -19,6 +19,11 @@ typedef __int64(__fastcall* _Serial)();
 _ConsoleMessage ConsoleMessagePtr = nullptr;
 _NewString NewStringPtr = nullptr;
 
+const uintptr_t gameBase = (uintptr_t)GetModuleHandleA(NULL);
+const uintptr_t clientBase = (uintptr_t)GetModuleHandleA("altv-client.dll");
+const _CreateHook CreateHook = (_CreateHook)(clientBase + 0x6AAC0);
+const _EnableHook EnableHook = (_EnableHook)(clientBase + 0x6AD40);
+
 class Script
 {
 public:
@@ -133,31 +138,14 @@ __int64 __fastcall DetourSerial() { return serial; }
 
 void Executor::Initialize()
 {
-    const uintptr_t moduleBase = (uintptr_t)GetModuleHandleA("altv-client.dll");
-
-    const _CreateHook CreateHook = (_CreateHook)(moduleBase + 0x6AAC0);
-    const _EnableHook EnableHook = (_EnableHook)(moduleBase + 0x6AD40);
-
-    const _ConsoleMessage ConsoleMessage = (_ConsoleMessage)(moduleBase + 0x125A0);
-    const _NewString NewString = (_NewString)(moduleBase + 0x1AEEBE);
-    const _Serial SocialId = (_Serial)(moduleBase + 0x21630);
-    const _Serial MachineGuid = (_Serial)(moduleBase + 0x209E0);
-    const _Serial ProductId = (_Serial)(moduleBase + 0x208A0);
-    const _Serial LicenseHash = (_Serial)(moduleBase + 0x128240);
+    const _ConsoleMessage ConsoleMessage = (_ConsoleMessage)(clientBase + 0x125A0);
+    const _NewString NewString = (_NewString)(clientBase + 0x1AEEBE);
 
     CreateHook((__int64)ConsoleMessage, (__int64)DetourConsoleMessage, (unsigned __int64*)(&ConsoleMessagePtr));
     CreateHook((__int64)NewString, (__int64)DetourNewString, (unsigned __int64*)(&NewStringPtr));
-    CreateHook((__int64)SocialId, (__int64)DetourSerial, nullptr);
-    CreateHook((__int64)MachineGuid, (__int64)DetourSerial, nullptr);
-    CreateHook((__int64)ProductId, (__int64)DetourSerial, nullptr);
-    CreateHook((__int64)LicenseHash, (__int64)DetourSerial, nullptr);
 
     EnableHook((__int64)ConsoleMessage);
     EnableHook((__int64)NewString);
-    EnableHook((__int64)SocialId);
-    EnableHook((__int64)ProductId);
-    EnableHook((__int64)MachineGuid);
-    EnableHook((__int64)LicenseHash);
 
     CreateDirectoryA("C:\\AltCheat", NULL);
 }
@@ -192,8 +180,22 @@ void Executor::Remove(std::string const& str)
 
 void Executor::Serial(std::string const& str)
 {
-    const uintptr_t moduleBase = (uintptr_t)GetModuleHandleA(NULL);
-    strcpy_s((char*)(moduleBase + 0x2D3229F), 13, random_string().c_str());
+    const _Serial SocialId = (_Serial)(clientBase + 0x21630);
+    const _Serial MachineGuid = (_Serial)(clientBase + 0x209E0);
+    const _Serial ProductId = (_Serial)(clientBase + 0x208A0);
+    const _Serial LicenseHash = (_Serial)(clientBase + 0x128240);
+
+    CreateHook((__int64)SocialId, (__int64)DetourSerial, nullptr);
+    CreateHook((__int64)MachineGuid, (__int64)DetourSerial, nullptr);
+    CreateHook((__int64)ProductId, (__int64)DetourSerial, nullptr);
+    CreateHook((__int64)LicenseHash, (__int64)DetourSerial, nullptr);
+
+    EnableHook((__int64)SocialId);
+    EnableHook((__int64)ProductId);
+    EnableHook((__int64)MachineGuid);
+    EnableHook((__int64)LicenseHash);
+
+    strcpy_s((char*)(gameBase + 0x2D3229F), 13, random_string().c_str());
 
     serial = std::stoi(str);
     std::cout << "Succesfully set the serial!" << std::endl;
@@ -201,8 +203,7 @@ void Executor::Serial(std::string const& str)
 
 void Executor::Weapon()
 {
-    const uintptr_t moduleBase = (uintptr_t)GetModuleHandleA(NULL);
-    memset((void*)(moduleBase + 0x10FB898), 0x90, 6);
+    memset((void*)(gameBase + 0x10FB898), 0x90, 6);
     std::cout << "Succesfully blocked weapon checks!" << std::endl;
 }
 
