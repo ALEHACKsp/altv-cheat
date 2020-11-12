@@ -11,7 +11,7 @@ Multihack for alt:V Multiplayer.
 
 ## Commands
 
-* **exec [file name]** - Loads a file for executing code (put files in C:/AltCheat), you can try the **sample_modmenu.js** I provided
+* **exec [file name]** - Loads a file for executing code (put files in C:/AltCheat), you can try the **sample_modmenu.js** I provided (press key 8 to open)
 * **find [string]** - Default value: **import**, it'll look for the specified string in the original scripts when executing or removing (see **remove** below)
 * **remove [string]** - Loads a file for executing code (put files in C:/AltCheat)
 * **dump** - Dumps client-side scripts of current server (C:/AltCheat/dumper)
