@@ -2,10 +2,6 @@
 
 Multihack for alt:V Multiplayer.
 
-## Release
-
-Compiled DLL download: https://github.com/Keiichi32/altv-cheat/releases/download/1.0/altv-cheat.dll
-
 ## Features
 
 * JavaScript executor
