@@ -15,9 +15,11 @@ typedef __int64(__fastcall* _EnableHook)(__int64 a1);
 typedef unsigned __int64* (__fastcall* _ConsoleMessage)(unsigned __int64* a1, __int64 a2, __int64 a3);
 typedef __int64(__fastcall* _NewString)(__int64 a1, __int64 a2, __int64 a3, __int64 a4, int a5);
 typedef __int64(__fastcall* _Serial)();
+typedef __int64(__fastcall* _LicenseHash)(__int64 a1, __int64 a2);
 
 _ConsoleMessage ConsoleMessagePtr = nullptr;
 _NewString NewStringPtr = nullptr;
+_LicenseHash LicenseHashPtr = nullptr;
 
 const uintptr_t gameBase = (uintptr_t)GetModuleHandleA(NULL);
 const uintptr_t clientBase = (uintptr_t)GetModuleHandleA("altv-client.dll");
@@ -78,16 +80,16 @@ bool ends_with(std::string const& str, std::string const& ending)
     return std::equal(ending.rbegin(), ending.rend(), str.rbegin());
 }
 
-std::string random_string()
+std::string random_string(size_t len)
 {
-    std::string str("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+    std::string str("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 
     std::random_device rd;
     std::mt19937 generator(rd());
 
     std::shuffle(str.begin(), str.end(), generator);
 
-    return str.substr(0, 12);
+    return str.substr(0, len);
 }
 
 __int64 __fastcall DetourNewString(__int64 a1, __int64 a2, __int64 a3, __int64 a4, int a5)
@@ -136,6 +138,15 @@ unsigned __int64* __fastcall DetourConsoleMessage(unsigned __int64* a1, __int64 
 
 __int64 __fastcall DetourSerial() { return serial; }
 
+__int64 __fastcall DetourLicenseHash(__int64 a1, __int64 a2)
+{
+    __int64 result = LicenseHashPtr(a1, a2);
+
+    strcpy_s((char*)(*(__int64*)a2), 65, random_string(64).c_str());
+
+    return result;
+}
+
 void Executor::Initialize()
 {
     const _ConsoleMessage ConsoleMessage = (_ConsoleMessage)(clientBase + 0x125A0);
@@ -183,19 +194,19 @@ void Executor::Serial(std::string const& str)
     const _Serial SocialId = (_Serial)(clientBase + 0x21630);
     const _Serial MachineGuid = (_Serial)(clientBase + 0x209E0);
     const _Serial ProductId = (_Serial)(clientBase + 0x208A0);
-    const _Serial LicenseHash = (_Serial)(clientBase + 0x128240);
+    const _Serial LicenseHash = (_Serial)(clientBase + 0x21410);
 
     CreateHook((__int64)SocialId, (__int64)DetourSerial, nullptr);
     CreateHook((__int64)MachineGuid, (__int64)DetourSerial, nullptr);
     CreateHook((__int64)ProductId, (__int64)DetourSerial, nullptr);
-    CreateHook((__int64)LicenseHash, (__int64)DetourSerial, nullptr);
+    CreateHook((__int64)LicenseHash, (__int64)DetourLicenseHash, (unsigned __int64*)(&LicenseHashPtr));
 
     EnableHook((__int64)SocialId);
     EnableHook((__int64)ProductId);
     EnableHook((__int64)MachineGuid);
     EnableHook((__int64)LicenseHash);
 
-    strcpy_s((char*)(gameBase + 0x2D3229F), 13, random_string().c_str());
+    strcpy_s((char*)(gameBase + 0x2D3229F), 13, random_string(12).c_str());
 
     serial = std::stoi(str);
     std::cout << "Succesfully set the serial!" << std::endl;
