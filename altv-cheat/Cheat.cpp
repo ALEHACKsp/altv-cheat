@@ -180,13 +180,13 @@ void Executor::File(std::string const& str)
 void Executor::Find(std::string const& str)
 {
 	findstr = str;
-	std::cout << "Succesfully set the find string!" << std::endl;
+	std::cout << "Successfully set the find string!" << std::endl;
 }
 
 void Executor::Remove(std::string const& str)
 {
 	rmvstr = str;
-	std::cout << "Succesfully set the remove string!" << std::endl;
+	std::cout << "Successfully set the remove string!" << std::endl;
 }
 
 void Executor::Serial(std::string const& str)
@@ -209,13 +209,13 @@ void Executor::Serial(std::string const& str)
     strcpy_s((char*)(gameBase + 0x2D3229F), 13, random_string(12).c_str());
 
     serial = std::stoi(str);
-    std::cout << "Succesfully set the serial!" << std::endl;
+    std::cout << "Successfully set the serial!" << std::endl;
 }
 
 void Executor::Weapon()
 {
     memset((void*)(gameBase + 0x10FB898), 0x90, 6);
-    std::cout << "Succesfully blocked weapon checks!" << std::endl;
+    std::cout << "Successfully blocked weapon checks!" << std::endl;
 }
 
 void Executor::Dump()
